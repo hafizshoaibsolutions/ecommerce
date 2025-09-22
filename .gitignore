@@ -1,0 +1,21 @@
+
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment files
+*.env
+.env*
+
+# Build outputs
+dist/
+build/
+.next/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+
+
