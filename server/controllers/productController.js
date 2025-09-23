@@ -19,20 +19,34 @@ const createProduct = async (req, res) => {
 
 
   console.log("Request body:", req?.body);
-  console.log("Uploaded files:", req?.body?.images?.files);
+  console.log("Uploaded files (req.files):", req?.files);
+ 
 
 
   try {
     // 🖼 Handle image uploads
     const imgUrls = [];
-    if (req.files?.length) {
+
+    // When using multer-storage-cloudinary, multer already uploads files to Cloudinary
+    // and each file will include a `path` or `filename`/`path` depending on configuration.
+    // If req.files is present, prefer the URL provided by the storage engine.
+    if (req.files && req.files.length) {
       for (const file of req.files) {
-        const uploadResult = await cloudinary.uploader.upload(file.path, {
-          folder: "mern-ecommerce",
-          allowed_formats: ["jpg", "jpeg", "png", "webp"],
-        });
-        imgUrls.push(uploadResult.secure_url);
+        // Depending on storage engine, the uploaded file may have `path`, `url`, or `secure_url`.
+        // multer-storage-cloudinary typically sets `path` to the Cloudinary URL.
+        const fileUrl = file.path || file.url || file.secure_url || file.location
+        if (fileUrl) imgUrls.push(fileUrl)
+        else if (file.path) {
+          // as a fallback, try to upload the file.path (local path) to cloudinary
+          const uploadResult = await cloudinary.uploader.upload(file.path, {
+            folder: "mern-ecommerce",
+            allowed_formats: ["jpg", "jpeg", "png", "webp"],
+          });
+          imgUrls.push(uploadResult.secure_url);
+        }
       }
+    } else {
+      console.log("No req.files - the request may not have been sent as multipart/form-data. Make sure the client does NOT force Content-Type and lets the browser set the multipart boundary.")
     }
 
     // 🧹 Extract and parse product fields

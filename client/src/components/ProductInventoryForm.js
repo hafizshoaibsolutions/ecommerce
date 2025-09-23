@@ -57,7 +57,7 @@ const InventoryForm = memo(({ product, dispatchProduct }) => (
                 onChange={(e) =>
                   dispatchProduct({
                     type: "SET_QUANTITY",
-                    payload: e.target.value === "" ? "" : Number(e.target.value),
+                    payload: e.target.value ,
                   })
                 }
               className="w-full rounded-lg border p-2.5"
@@ -81,12 +81,12 @@ const InventoryForm = memo(({ product, dispatchProduct }) => (
                 <label className="block mb-2 text-sm font-medium">Item Weight (kg)</label>
                 <input
                   type="number"
-                  value={product.weight ?? ""}
+                  value={product.weight}
                   onChange={(e) =>
-                    updateProduct(
-                      "weight",
-                      e.target.value === "" ? "" : Number(e.target.value)
-                    )
+                    dispatchProduct({
+                      type: "SET_WEIGHT",
+                      payload: e.target.value 
+                    })
                   }
                   className="w-full rounded-lg border p-2.5"
                   placeholder="0"

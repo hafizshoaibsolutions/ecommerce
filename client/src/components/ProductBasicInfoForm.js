@@ -1,27 +1,33 @@
-import React, {useState, memo,useRef,useImperativeHandle,forwardRef } from "react";
+import React, {useState,useRef,useImperativeHandle,forwardRef } from "react";
 import ImageUploader from "./imageFileUpload";
-import {FileWithPreview} from "@/hooks/use-file-upload"
 
-const BasicInfoForm = forwardRef(({ product , dispatchProduct},ref) => {
+
+const BasicInfoForm = forwardRef(({ product , dispatchProduct , onImagesChange },ref) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const imageUploaderRef = useRef(null);
 
+  console.log(product,"product in basic info form");
+  console.log(onImagesChange,"onImagesChange in basic info form");
+  console.log(dispatchProduct,"dispatchProduct in basic info form");
+  console.log(ref,"ref in basic info form");
+
   useImperativeHandle(ref, () => ({
     clearImages: () => {
-      if (imageUploaderRef?.current) {
-        imageUploaderRef?.current?.clearImages();
-        setSelectedImages([]);
-      }
-      dispatchProduct({ type: "SET_IMAGES", payload: [] }); // Clear images in parent state
+      setSelectedImages([]);
+      imageUploaderRef.current?.clearFiles(); // Clear files in ImageUploader
+      onImagesChange?.([]) // Clear images in parent state
     }
   }));
 
-  const handleImageChange = (files) => {
-    setSelectedImages(files);
-      const rawFiles = files.map(f => f.file);
-      console.log(rawFiles, "Extracted raw File objects");
-      dispatchProduct({ type: "SET_IMAGES", payload: rawFiles });
-  };
+ const handleImagesChange = (files) => {
+    console.log("[v0] All images updated:", files)
+    setSelectedImages(files)
+
+    if (onImagesChange) {
+      const rawFiles = files.map((f) => f.file)
+      onImagesChange(rawFiles)
+    }
+  }
 
   const handleNewImagesAdded = (newFiles) => {
     console.log("New images added:", newFiles)
@@ -63,7 +69,7 @@ const BasicInfoForm = forwardRef(({ product , dispatchProduct},ref) => {
 
       <ImageUploader
         ref={imageUploaderRef}
-        onImagesChange={handleImageChange}
+        onImagesChange={handleImagesChange}
         onNewImagesAdded={handleNewImagesAdded}
         maxFiles={10}
         maxSizeMB={5}

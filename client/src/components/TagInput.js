@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"; // shadcn input
 export default function TagInput({
   placeholder = "Add a tag and press enter...",
   tags ,
- dispatchProduct,
+  dispatchProduct,
 }) {
   const [inputValue, setInputValue] = useState("");
 
@@ -17,7 +17,7 @@ export default function TagInput({
       e.preventDefault();
       if (!tags.includes(inputValue.trim())) {
         const newTags = [...tags, inputValue.trim()];
-        updateProduct("tags", newTags); // ✅ update parent
+        dispatchProduct({type:"SET_TAGS", payload: newTags}); // ✅ update parent
       }
       setInputValue("");
     }

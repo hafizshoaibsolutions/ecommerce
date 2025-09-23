@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback, useReducer,useRef } from "react";
+import React, { useState, useReducer, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 
@@ -116,89 +116,98 @@ function AddProductPage() {
   
   const [options, setOptions] = useState([]);
   const [variants, setVariants] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   
  
 
 
-  // const handleImageChange = (files) => {
-  //   dispatchProduct({ type: "SET_IMAGES", payload: files });
-  //   console.log(files,'files in add product page')
-  // }
+  const handleImagesChange = useCallback((files) => {
+    dispatchProduct({ type: "SET_IMAGES", payload: files });
+  }, [dispatchProduct]);
 
-  const handleAddProduct = async () => {
-  // 1️⃣ Create FormData
-  const formData = new FormData();
-  
+  const handleAddProduct = useCallback(async () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
 
-  if (product.images && product.images.length > 0) {
-        product.images.forEach((file, index) => {
-          formData.append(`images[${index}]`, file)
+    try {
+      const formData = new FormData()
+
+      if (product.images && product.images.length > 0) {
+        // multer expects the same field name for array uploads (e.g. upload.array('images'))
+        // so append each file using the same field name 'images'. Also support wrapper objects
+        product.images.forEach((item) => {
+          const file = item instanceof File ? item : (item && item.file) ? item.file : null
+          if (file instanceof File) formData.append('images', file)
         })
       }
 
-  // 2️⃣ Append text fields
-  formData.append("title", product.title);
-  formData.append("description", product.description);
-  formData.append("price", String(product.price));
-  formData.append("compareAtPrice", String(product.compareAtPrice));
-  formData.append("costPerItem", String(product.costPerItem));
-  formData.append("sku", product.sku);
-  formData.append("barcode", product.barcode);
-  formData.append("weight", String(product.weight));
-  formData.append("chargeTax", String(product.chargeTax));
-  formData.append("trackQuantity", String(product.trackQuantity));
-  formData.append("continueSellingWhenOutOfStock", String(product.continueSellingWhenOutOfStock));
-  formData.append("isPhysicalProduct", String(product.isPhysicalProduct));
-  formData.append("vendor", product.vendor);
-  formData.append("status", product.status);
-  formData.append("metaTitle", product.metaTitle);
-  formData.append("metaDescription", product.metaDescription);
+      // append scalar fields
+      const scalarFields = [
+        "title",
+        "description",
+        "price",
+        "compareAtPrice",
+        "costPerItem",
+        "sku",
+        "barcode",
+        "weight",
+        "chargeTax",
+        "trackQuantity",
+        "continueSellingWhenOutOfStock",
+        "isPhysicalProduct",
+        "vendor",
+        "status",
+        "metaTitle",
+        "metaDescription",
+      ]
 
-  // 3️⃣ Append arrays/objects as JSON strings
-  formData.append("collections", JSON.stringify(product.collections));
-  formData.append("promotions", JSON.stringify(product.promotions));
-  formData.append("tags", JSON.stringify(product.tags));
-  formData.append("categories", JSON.stringify(product.categories));
+      scalarFields.forEach((key) => {
+        if (product[key] !== undefined && product[key] !== null) {
+          formData.append(key, String(product[key]))
+        }
+      })
 
-  // Format and append variants
-  const formattedVariants = variants.map(({ price, sku, barcode, quantity, images, ...options }) => ({
-    options,
-    price,
-    sku,
-    barcode,
-    quantity,
-    images: [],
-  }));
-  formData.append("variants", JSON.stringify(formattedVariants));
+      // append array/object fields as JSON
+      formData.append("collections", JSON.stringify(product.collections || []))
+      formData.append("promotions", JSON.stringify(product.promotions || []))
+      formData.append("tags", JSON.stringify(product.tags || []))
+      formData.append("categories", JSON.stringify(product.categories || []))
 
-  console.log(" submitting form with data",{
-    title: product.title,
-    description: product.description,
-    price: product.price,
-    compareAtPrice: product.compareAtPrice,
+      // format and append variants (flatten options only)
+      const formattedVariants = variants.map((v) => {
+        const { price, sku, barcode, quantity } = v || {}
+        return { price, sku, barcode, quantity, options: v.options || [], images: [] }
+      })
+      formData.append("variants", JSON.stringify(formattedVariants))
+
+      // console the form data keys and values for debugging
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+
+      // dispatch the thunk and await if it returns a promise
+      
+
+      const result = dispatch(addProducts(formData))
+      if (result instanceof Promise) await result
+
+      // reset local state
+      dispatchProduct({ type: "RESET_FORM" })
+      // clear file UI via ref if available
+      if (parentRef.current && typeof parentRef.current.clearImages === "function") {
+        parentRef.current.clearImages()
+      }
+      setVariants([])
+      setOptions([])
+    } catch (err) {
+      console.error("Failed to add product", err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [isSubmitting, product, variants, dispatch, setOptions])
 
 
-  })
-
-  
-
-  console.log(formData,"Form data")
-
-  // 5️⃣ Dispatch Redux thunk
-  dispatch(addProducts(formData));
-
-  // 6️⃣ Reset local state if needed
-  dispatchProduct({ type: "RESET_FORM" });
-   setTimeout(() => {
-          console.log("[v0] Clearing images from UI...")
-          parentRef.current?.clearImages()
-    }, 50)
-  setVariants([]);
-  setOptions([]);
-};
-
-console.log(product,'product in add product page')
   
 
   return (
@@ -238,7 +247,7 @@ console.log(product,'product in add product page')
       {/* Sections */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-2 pt-4">
        <div className="col-span-2"> 
-         <BasicInfoForm product={product} dispatchProduct={dispatchProduct} ref = {parentRef}  />
+         <BasicInfoForm ref={parentRef} product={product} dispatchProduct={dispatchProduct}  onImagesChange={handleImagesChange}  />
        </div>
        <div className="col-span-2 sm:col-span-1">
          <ProductOrganization product={product} dispatchProduct={dispatchProduct}  />

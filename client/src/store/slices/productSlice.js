@@ -3,19 +3,22 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL: "http://localhost:5000",
-    headers: {
-        "Content-Type": "application/json",
-    },
+   
 });
 
 
 export const addProducts = createAsyncThunk(
     "product/addProducts",
-    async (productData,{ rejectWithValue }) => {
-         console.log(productData,"product data in thunk");
+    async (productFormData,{ rejectWithValue }) => {
+         console.log(productFormData,"product data in thunk");
+
          
         try {
-            const response = await api.post("/api/products/add-product", productData);
+            const response = await axios.post("http://localhost:5000/api/products/add-product", productFormData,{
+                 headers: {
+                      'Content-Type': 'multipart/form-data'
+                 }
+            });
             console.log(response.data,"response data in thunk");
             return response.data;
 
