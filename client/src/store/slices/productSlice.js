@@ -30,6 +30,25 @@ export const addProducts = createAsyncThunk(
     }
 )
 
+export const getAllProducts = createAsyncThunk(
+    "product/getAllProducts",
+    async (_, { rejectWithValue }) => {
+
+            console.log("Fetching products");
+
+        try {
+            const response = await axios.get("http://localhost:5000/api/products/get-product");
+            console.log(response.data,"response data in getAllProducts thunk");
+            return response.data;
+
+
+    } catch (error) {
+            console.error("Error fetching products:", error);
+            return rejectWithValue("Failed to fetch products");
+        }
+    }
+)
+
 
 const initialState = {
     products: [],
@@ -62,7 +81,23 @@ const productSlice = createSlice({
         builder.addCase(addProducts.rejected, (state) => {
             state.isLoading = false;
         });
+
+        builder.addCase(getAllProducts.pending, (state) => {
+            state.isLoading = true;
+        });
+        builder.addCase(getAllProducts.fulfilled, (state, action) => {
+            console.log(action.payload,"response data in getAllProducts builder");
+            state.isLoading = false;
+            console.log(action.payload.products,"products in payload");
+            state.products = action.payload
+        }
+        );
+        builder.addCase(getAllProducts.rejected, (state) => {
+            state.isLoading = false;
+        });
     }
+
+
 });
 
 export const { addProduct, updateProduct } = productSlice.actions;

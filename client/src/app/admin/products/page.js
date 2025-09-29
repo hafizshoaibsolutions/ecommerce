@@ -1,19 +1,47 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { GoPlus } from "react-icons/go";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { getAllProducts } from '@/store/slices/productSlice';
+
+import { Button } from '@/components/ui/button';
+import { useDispatch, useSelector } from 'react-redux';
+
+
 
 function ProductsPage() {
-  const pathname = usePathname(); // e.g., "/admin/products"
+
+  const{ products } = useSelector(state => state.product);
+
+  console.log("Products in store:", products.products);
+
+  const productList = products.products;
+
+  const pathname = usePathname(); 
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  useEffect(()=>{
+    dispatch(getAllProducts()).then((response) => {
+      if(response.payload.success){
+        console.log("Products fetched successfully:", response.payload.products);
+      } else {
+        console.error("Failed to fetch products:", response.payload.message);
+      }
+    });
+  }, [dispatch]);
+
+
+
+
 
   const path = pathname.split('/').filter(item => item !== '');
   const title = path[path.length - 1];
 
   return (
-    <div>
-      <div className='flex items-center justify-between gap-2 px-2 py-3  border-gray-700'>
+    <div className=''>
+      <div className='flex items-center justify-between gap-2 px-2 py-3  border-gray-700 '>
         <h2 className='text-xl font-bold capitalize'>{title}</h2>
         <div className='flex items-center gap-2'>
           {path.map((item, index) => {
@@ -43,21 +71,13 @@ function ProductsPage() {
 
        <div className='flex flex-col gap-1'>
         <h2 className='text-xl text-[#412939] font-bold'>Products List</h2>
-        <p className='text-sm text-gray-500'>Track your store's progress to boost your sales.</p>
+        <p className=' text-sm text-gray-500'>Track your store's progress to boost your sales.</p>
        </div>
        <div className='flex justify-center gap-9 sm:gap-1'>
-       <button type="button" className="cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Light</button>
-       <button type="button" className="   text-white bg-blue-700 cursor-pointer
-        hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium 
-        rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600
-         dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-         onClick={()=>{router.push('/admin/products/add-product')}}>
-        <div className='flex gap-1 items-center '>
-        <span> <GoPlus size={20}  /> </span>
-        <span className='text-[16px] font-medium '>Add Product</span>
-        </div>
-         
-        </button>
+       <button type="button" className="cursor-pointer text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-600">Light</button>
+      <Button className="bg-gray-300 hover:bg-gray-400 text-black cursor-pointer" onClick={()=>router.push("/admin/products/add-product")}>
+        Add Product
+      </Button>
        </div>
        </div>
 
@@ -122,59 +142,42 @@ function ProductsPage() {
         </th>
       </tr>
     </thead>
-    <tbody>
-      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+
+
+  <tbody>
+    { productList && productList.map((product) => (
+      <tr key={product._id || product.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-          Apple MacBook Pro 17"
+          {product.title}
         </th>
+        
+           <td className="px-6 py-4">
+        <div className="flex gap-2">
+          {product?.variants.map((variant, index) => (
+            <div
+              key={index}
+              className="w-6 h-6 rounded-full border shadow"
+              style={{ backgroundColor: variant.options.color }}
+              title={variant.options.color} // Tooltip
+            ></div>
+          ))}
+        </div>
+      </td>
+        
         <td className="px-6 py-4">
-          Silver
+          {product.category || "—"}
         </td>
         <td className="px-6 py-4">
-          Laptop
-        </td>
-        <td className="px-6 py-4">
-          $2999
+          ${product?.price}
         </td>
         <td className="px-6 py-4 text-right">
-          <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+          <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline" onClick={() => handleEdit(product._id)}>Edit</a>
         </td>
       </tr>
-      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-          Microsoft Surface Pro
-        </th>
-        <td className="px-6 py-4">
-          White
-        </td>
-        <td className="px-6 py-4">
-          Laptop PC
-        </td>
-        <td className="px-6 py-4">
-          $1999
-        </td>
-        <td className="px-6 py-4 text-right">
-          <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-        </td>
-      </tr>
-      <tr className="bg-white dark:bg-gray-800">
-        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-          Magic Mouse 2
-        </th>
-        <td className="px-6 py-4">
-          Black
-        </td>
-        <td className="px-6 py-4">
-          Accessories
-        </td>
-        <td className="px-6 py-4">
-          $99
-        </td>
-        <td className="px-6 py-4 text-right">
-          <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-        </td>
-      </tr>
-    </tbody>
+    ))}
+  </tbody>
+
+    
   </table>
 </div>
 <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">

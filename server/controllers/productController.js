@@ -133,8 +133,14 @@ const createProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.json(products);
+    console.log("Fetched products:", products);
+    res.status(201).json({
+      success: true,
+      message: "✅ Products fetched successfully",
+      products,
+    });
   } catch (err) {
+    console.error("Error fetching products:", err);
     res.status(500).json({ error: err.message });
   }
 };

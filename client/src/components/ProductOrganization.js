@@ -121,14 +121,17 @@ function ProductOrganization({ product, dispatchProduct }) {
                 <TagInput tags={product?.tags} dispatchProduct={dispatchProduct} />
               </div>
 
-              <div className="sm:col-span-2 flex gap-5 items-center">
-                <Label className="">Status :</Label>
+              <div className="sm:col-span-2 flex flex-col gap-3">
+                <Label className="">Status</Label>
+
+                
 
                 <RadioGroup
                   value={product?.status}
                   onValueChange={(value) => dispatchProduct({ type: "SET_STATUS", payload: value })}
                   className="flex"
                 >
+                  <div className="flex items-center gap-6 flex-wrap ">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="draft" id="r1" />
                     <Label htmlFor="r1">Draft</Label>
@@ -141,8 +144,10 @@ function ProductOrganization({ product, dispatchProduct }) {
                     <RadioGroupItem value="archived" id="r3" />
                     <Label htmlFor="r3">Archived</Label>
                   </div>
+                  </div>
                 </RadioGroup>
-              </div>
+                </div>
+            
             </div>
           </form>
         </div>

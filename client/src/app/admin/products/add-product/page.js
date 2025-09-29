@@ -3,7 +3,6 @@ import React, { useState, useReducer, useRef, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 
-import CheckboxComponent from "@/components/Checkbox";
 import VariantForm from "@/components/ProductVariantForm";
 import { Button } from "@/components/ui/button";
 import BasicInfoForm from "@/components/ProductBasicInfoForm";
@@ -108,7 +107,9 @@ function AddProductPage() {
   const pathname = usePathname(); // e.g., "/admin/products"
   const path = pathname.split("/").filter((item) => item !== "");
   const title = path[path.length - 1];
+
   const dispatch = useDispatch();
+
   const [product, dispatchProduct] = useReducer(productReducer, initialProduct);
 
   const parentRef = useRef(null);
@@ -134,11 +135,8 @@ function AddProductPage() {
       const formData = new FormData()
 
       if (product.images && product.images.length > 0) {
-        // multer expects the same field name for array uploads (e.g. upload.array('images'))
-        // so append each file using the same field name 'images'. Also support wrapper objects
-        product.images.forEach((item) => {
-          const file = item instanceof File ? item : (item && item.file) ? item.file : null
-          if (file instanceof File) formData.append('images', file)
+        product.images.forEach((file) => {
+          if (file instanceof File) formData.append(`images`, file)
         })
       }
 
@@ -181,12 +179,6 @@ function AddProductPage() {
       })
       formData.append("variants", JSON.stringify(formattedVariants))
 
-      // console the form data keys and values for debugging
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
-      // dispatch the thunk and await if it returns a promise
       
 
       const result = dispatch(addProducts(formData))
@@ -213,7 +205,7 @@ function AddProductPage() {
   return (
     <div>
       {/* Header & Breadcrumbs */}
-      <div className="flex items-center justify-between gap-2 px-2 py-3 border-gray-700 pt-20 sm:pt-16">
+      <div className="flex items-center justify-between gap-2 px-2 py-3 border-gray-700 ">
         <h2 className="text-xl font-bold capitalize">{title}</h2>
         <div className="flex items-center gap-2">
           {path.map((item, index) => {
