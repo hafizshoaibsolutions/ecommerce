@@ -13,7 +13,7 @@ function AdminLayout({children}) {
   
         <div className='flex-1 flex flex-col '>
             <AdminNavbar isOpen={isOpen} setIsOpen={setIsOpen}/>
-            <main className='flex-1 flex-col flex p-4 md:p-6 lg:ml-64 lg:mt-14 mt-14 '>
+            <main className='flex-1 flex-col flex p-4 md:p-6 lg:ml-64 lg:mt-14 mt-14 bg-[#F9FAFB] '>
                 {children}
             </main>
         </div>

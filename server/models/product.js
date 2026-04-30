@@ -39,11 +39,11 @@ const productSchema = new mongoose.Schema(
 
     // Relationships
     vendor: { type: String, trim: true },
-    collections: [{ type: String, trim: true }],
+    collections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Collection" }],
     promotions: [{ type: String, trim: true }],
 
     productType: { type: String, trim: true },
-    categories: [{ type: String, trim: true }],
+    categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
 
     
 

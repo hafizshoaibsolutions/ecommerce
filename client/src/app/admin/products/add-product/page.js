@@ -170,12 +170,30 @@ function AddProductPage() {
       formData.append("collections", JSON.stringify(product.collections || []))
       formData.append("promotions", JSON.stringify(product.promotions || []))
       formData.append("tags", JSON.stringify(product.tags || []))
-      formData.append("categories", JSON.stringify(product.categories || []))
+      // Extract only _id from category objects
+      const categoryIds = (product.categories || []).map(cat => typeof cat === 'object' ? cat._id : cat)
+      formData.append("categories", JSON.stringify(categoryIds))
 
-      // format and append variants (flatten options only)
+      // format and append variants with options stored as array
       const formattedVariants = variants.map((v) => {
         const { price, sku, barcode, quantity } = v || {}
-        return { price, sku, barcode, quantity, options: v.options || [], images: [] }
+        
+        // Extract options from variant object (all keys except price, sku, barcode, quantity)
+        const variantOptions = Object.keys(v)
+          .filter((key) => !["price", "sku", "barcode", "quantity"].includes(key))
+          .map((key) => ({
+            name: key,
+            value: v[key]
+          }))
+        
+        return { 
+          price, 
+          sku, 
+          barcode, 
+          quantity, 
+          options: variantOptions,
+          images: [] 
+        }
       })
       formData.append("variants", JSON.stringify(formattedVariants))
 

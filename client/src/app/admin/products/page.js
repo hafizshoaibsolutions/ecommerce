@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { GoPlus } from "react-icons/go";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { getAllProducts } from '@/store/slices/productSlice';
@@ -14,7 +15,7 @@ function ProductsPage() {
 
   const{ products } = useSelector(state => state.product);
 
-  console.log("Products in store:", products.products);
+  console.log("Products in store:", products);
 
   const productList = products.products;
 
@@ -171,7 +172,7 @@ function ProductsPage() {
           ${product?.price}
         </td>
         <td className="px-6 py-4 text-right">
-          <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline" onClick={() => handleEdit(product._id)}>Edit</a>
+          <Link href={`/admin/products/${product._id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline" >View</Link>
         </td>
       </tr>
     ))}

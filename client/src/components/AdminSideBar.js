@@ -7,7 +7,11 @@ import {
   ChartNoAxesCombined,
   LayoutDashboard,
   ShoppingBasket,
+  SwatchBook,
+  Group
+
 } from "lucide-react";
+
 
 import {
   Sheet,
@@ -39,6 +43,18 @@ const adminSideBarMenuItems = [
         label: 'Orders',
         path: '/admin/orders',
         icon: <BadgeCheck />
+    },
+    {
+        id: 'categories',
+        label: 'Categories',
+        path: '/admin/categories',
+        icon: <SwatchBook />
+    },
+    {
+        id:'collections',
+        label: 'Collections',
+        path: '/admin/collections',
+        icon: <Group />
     }
 
 ]
@@ -55,7 +71,7 @@ function MenuItems({ setIsOpen }) {
                 <div key={item.id} onClick={() => {
                     router.push(item.path);
                     setIsOpen ? setIsOpen(false) : null;
-                }} className={`text-xl flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${pathname === item.path ? 'bg-gray-300 text-gray-600' : 'text-gray-600 hover:bg-gray-300 hover:text-white'}`}>
+                }} className={`text-xl flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${pathname === item.path ? 'bg-gray-300 text-gray-600' : 'text-gray-600 hover:bg-gray-200 '}`}>
                     {item.icon}
                     <span>{item.label}</span>
                 </div>
@@ -74,9 +90,9 @@ function AdminSideBar({ isOpen, setIsOpen }) {
             <SheetContent side="left" className="w-64 ">
                 <div className="h-full flex flex-col ">
                 <SheetHeader className="border-b">
-                    <SheetTitle className="flex gap-2  mt-5 mb-5" >
+                    <SheetTitle className="flex gap-2  mt-5 mb-5 text-2xl font-extrabold" >
                         <ChartNoAxesCombined size={30} />
-                        <h1 className="text-2xl font-extrabold">Admin Panel</h1>
+                        Admin Panel
 
 
                     </SheetTitle>

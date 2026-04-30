@@ -32,12 +32,12 @@ export const addProducts = createAsyncThunk(
 
 export const getAllProducts = createAsyncThunk(
     "product/getAllProducts",
-    async (_, { rejectWithValue }) => {
+    async ({ search = '', page = 1 } = {}, { rejectWithValue }) => {
 
             console.log("Fetching products");
 
         try {
-            const response = await axios.get("http://localhost:5000/api/products/get-product");
+            const response = await axios.get(`http://localhost:5000/api/products/get-product?search=${search}&page=${page}`);
             console.log(response.data,"response data in getAllProducts thunk");
             return response.data;
 
@@ -50,9 +50,27 @@ export const getAllProducts = createAsyncThunk(
 )
 
 
+export const getProductById = createAsyncThunk(
+    "product/getProductById",
+    async (productId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/products/get-product/${productId}`);
+            console.log(response.data,"response data in getProductById thunk");
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching product:", error);
+            return rejectWithValue("Failed to fetch product");
+        }
+    }
+);
+
 const initialState = {
     products: [],
-    isLoading: false
+    isLoading: false,
+    error: null,
+    productDetails: {},
+    totalPages: 1,
+    currentPage: 1,
 }
 
 const productSlice = createSlice({
@@ -89,12 +107,32 @@ const productSlice = createSlice({
             console.log(action.payload,"response data in getAllProducts builder");
             state.isLoading = false;
             console.log(action.payload.products,"products in payload");
-            state.products = action.payload
+            state.products = action.payload.products || [];
+            state.totalPages = action.payload.totalPages || 1;
+            state.currentPage = action.payload.currentPage || 1;
         }
         );
         builder.addCase(getAllProducts.rejected, (state) => {
             state.isLoading = false;
         });
+
+        builder.addCase(getProductById.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+
+            
+        });
+        builder.addCase(getProductById.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.error = null;
+            state.productDetails = action.payload;
+      
+        });
+        builder.addCase(getProductById.rejected, (state) => {
+            state.isLoading = false;
+            state.error = "Failed to fetch product";
+        });
+
     }
 
 
