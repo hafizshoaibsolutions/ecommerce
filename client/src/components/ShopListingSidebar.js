@@ -48,6 +48,16 @@ function ShopListingSidebar({isOpen, setIsOpen}) {
         </SheetContent>
 
       </Sheet>
+      <aside className='hidden md:block w-74'>
+        <div className='ml-4 bg-white shadow-md rounded-xl '>
+           <h2 className='text-sm font-semibold text-gray-700 px-4  py-4'>CATEGORIES</h2>
+            <div className='flex flex-col gap-2  px-4 py-4'>
+              
+            </div>
+        </div>
+        
+
+      </aside>
 
    </Fragment>              
   )

@@ -42,8 +42,8 @@ function page() {
 
 
   return (
-    <div className=''>
-      <div className='mt-6 px-4'>
+    <div className='bg-[#F9F8FE] min-h-screen'>
+      <div className='py-4 px-4'>
         <ShopListingBreadCrumb  items={breadCrumb} />
       </div>
     

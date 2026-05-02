@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchCategories } from "@/store/slices/categorySlice"
 
 /**
  * Custom hook to fetch and cache categories globally
@@ -13,16 +14,16 @@ export function useCachedCategories(cacheTimeout = 1 * 60 * 60 * 1000) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   
-  // Move useSelector to the top level of the hook
+  const dispatch = useDispatch()
   const reduxCategories = useSelector((state) => state.categories.allCategories)
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchCategoriesData = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        // Check localStorage cache
+        // Check localStorage cache first
         const cachedData = localStorage.getItem("appCategories")
         const cacheTimestamp = localStorage.getItem("appCategoriesTime")
         const now = new Date().getTime()
@@ -33,49 +34,61 @@ export function useCachedCategories(cacheTimeout = 1 * 60 * 60 * 1000) {
           if (timeDiff < cacheTimeout) {
             const parsedData = JSON.parse(cachedData)
             setCategories(parsedData)
-            console.log("📦 Using cached categories from useCachedCategories hook")
+            console.log("📦 Using cached categories from localStorage")
             setLoading(false)
             return
           }
         }
-        // Get categories from the redux store instead of making an API call
-        // Cache expired or doesn't exist - use Redux store data
-        console.log("🔄 Using categories from Redux store...")
-       
-        const data = reduxCategories
 
-        console.log(data, "data from redux store in useCachedCategories hook")
-
-        if (Array.isArray(data) && data.length > 0) {
-          // Filter only top-level categories (parent: null)
-          const topLevelCategories = data.filter((cat) => !cat.parent)
+        // Check if categories exist in Redux store
+        if (Array.isArray(reduxCategories) && reduxCategories.length > 0) {
+          console.log("🔄 Using categories from Redux store...")
+          const topLevelCategories = reduxCategories.filter((cat) => !cat.parent)
           
-          // Save to cache
+          // Save to localStorage cache
           localStorage.setItem("appCategories", JSON.stringify(topLevelCategories))
           localStorage.setItem("appCategoriesTime", now.toString())
           
           setCategories(topLevelCategories)
-          console.log(`✅ Cached ${topLevelCategories.length} categories`)
+          console.log(`✅ Loaded ${topLevelCategories.length} categories from Redux`)
+          setLoading(false)
+          return
+        }
+
+        // Redux store is empty - fetch from API
+        console.log("📡 Fetching categories from API...")
+        const result = await dispatch(fetchCategories())
+        
+        if (result.payload?.categories && Array.isArray(result.payload.categories)) {
+          const topLevelCategories = result.payload.categories.filter((cat) => !cat.parent)
+          
+          // Save to localStorage cache
+          localStorage.setItem("appCategories", JSON.stringify(topLevelCategories))
+          localStorage.setItem("appCategoriesTime", now.toString())
+          
+          setCategories(topLevelCategories)
+          console.log(`✅ Fetched and cached ${topLevelCategories.length} categories from API`)
         } else {
-          throw new Error("No categories available in Redux store")
+          throw new Error("Failed to fetch categories from API")
         }
       } catch (err) {
-        console.error("❌ Error fetching categories:", err)
+        console.error("❌ Error fetching categories:", err.message)
         setError(err.message)
         
         // Fallback: Try to use stale cache even if expired
         const cachedData = localStorage.getItem("appCategories")
         if (cachedData) {
-          console.log("⚠️ Using stale cache due to error")
+          console.log("⚠️ Using stale cache as fallback")
           setCategories(JSON.parse(cachedData))
+          setError(null) // Clear error since we have fallback data
         }
       } finally {
         setLoading(false)
       }
     }
 
-    fetchCategories()
-  }, [cacheTimeout, reduxCategories])
+    fetchCategoriesData()
+  }, [cacheTimeout, reduxCategories, dispatch])
 
   return { categories, loading, error }
 }
