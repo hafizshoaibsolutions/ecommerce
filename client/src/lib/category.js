@@ -1,7 +1,9 @@
 
 
 
-export function getBreadCrumb(categoryId, categories) {
+export const getBreadCrumb = (categoryId, categories) => {
+
+  console.log(categories.length, categoryId, "categories count and categoryId in getBreadCrumb");
   // Validate categories is an array
   if (!Array.isArray(categories) || categories.length === 0) {
     return [{ _id: "home", name: "Home", href: "/" }];
