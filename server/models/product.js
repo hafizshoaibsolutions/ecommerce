@@ -45,8 +45,6 @@ const productSchema = new mongoose.Schema(
     productType: { type: String, trim: true },
     categories: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
 
-    
-
 
     variants: [variantSchema],
     tags: [String],

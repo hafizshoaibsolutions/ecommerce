@@ -156,22 +156,38 @@ const createProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const { search, category, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
-    let query = {};
+    const { search, category, minPrice, maxPrice, brands, page = 1, limit = 10, sort = '-createdAt' } = req.query;
+    let query = { status: "active" };
 
     if (search) query.title = { $regex: search, $options: 'i' };
     if (category) query.categories = category;
+    
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
+    // Handle multiple brands filter
+    if (brands) {
+      const brandList = brands.split(',').map(b => b.trim()).filter(b => b);
+      if (brandList.length > 0) {
+        query.vendor = { $in: brandList };
+      }
+    }
+
+    // Build sort object from query parameter
+    const sortObj = {};
+    if (sort) {
+      const sortParam = sort.startsWith('-') ? sort.substring(1) : sort;
+      sortObj[sortParam] = sort.startsWith('-') ? -1 : 1;
+    }
+
     const products = await Product.find(query)
       .populate('categories')
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .sort({ createdAt: -1 });
+      .sort(sortObj || { createdAt: -1 });
 
     const total = await Product.countDocuments(query);
 
@@ -284,10 +300,139 @@ const updateProduct = async (req, res) => {
     }
 };
 
+// Get available filter options for sidebar (brands, variant keys, price range)
+const getFilterOptions = async (req, res) => {
+    try {
+        const { category } = req.query;
+        let matchStage = { $match: { status: "active" } };
+        
+        if (category) {
+            matchStage.$match.categories = category;
+        }
+
+        // Aggregation pipeline to extract unique brands, variant options, and price range
+        const filters = await Product.aggregate([
+            matchStage,
+            {
+                $facet: {
+                    brands: [
+                        { $match: { vendor: { $exists: true, $ne: null, $ne: "" } } },
+                        { $group: { _id: "$vendor" } },
+                        { $sort: { _id: 1 } }
+                    ],
+                    variantKeys: [
+                        { $unwind: "$variants" },
+                        { $unwind: { path: "$variants.options", preserveNullAndEmptyArrays: false } },
+                        { 
+                            $group: { 
+                                _id: null,
+                                keys: { $addToSet: { $objectToArray: "$variants.options" } }
+                            } 
+                        },
+                        { 
+                            $project: { 
+                                keys: {
+                                    $reduce: {
+                                        input: "$keys",
+                                        initialValue: [],
+                                        in: { $concatArrays: ["$$value", "$$this"] }
+                                    }
+                                }
+                            }
+                        },
+                        { 
+                            $project: { 
+                                uniqueKeys: {
+                                    $reduce: {
+                                        input: "$keys",
+                                        initialValue: [],
+                                        in: {
+                                            $cond: [
+                                                { $in: ["$$this.k", "$$value"] },
+                                                "$$value",
+                                                { $concatArrays: ["$$value", ["$$this.k"]] }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    priceRange: [
+                        { $group: { _id: null, minPrice: { $min: "$price" }, maxPrice: { $max: "$price" } } }
+                    ]
+                }
+            }
+        ]);
+
+        const result = filters[0];
+        
+        // Extract variant options for each key
+        const variantOptions = {};
+        if (result.variantKeys.length > 0 && result.variantKeys[0].uniqueKeys) {
+            for (const key of result.variantKeys[0].uniqueKeys) {
+                const options = await Product.aggregate([
+                    matchStage,
+                    { $unwind: "$variants" },
+                    { $unwind: "$variants.options" },
+                    { 
+                        $group: { 
+                            _id: `$variants.options.${key}`,
+                            count: { $sum: 1 }
+                        } 
+                    },
+                    { $sort: { _id: 1 } }
+                ]);
+                variantOptions[key] = options.map(opt => ({ value: opt._id, count: opt.count }));
+            }
+        }
+
+        const brands = result.brands.map(b => b._id).filter(b => b);
+        const priceRange = result.priceRange.length > 0 
+            ? result.priceRange[0]
+            : { minPrice: 0, maxPrice: 0 };
+
+        res.status(200).json({ 
+            success: true, 
+            brands, 
+            variantOptions,
+            priceRange,
+            variantKeys: result.variantKeys.length > 0 ? result.variantKeys[0].uniqueKeys : []
+        });
+
+    } catch (error) {
+        console.error("Error fetching filter options:", error);
+        res.status(500).json({ success: false, message: "Error fetching filter options", error: error.message });
+    }
+};
+
+// Get all product types
+const getProductTypes = async (req, res) => {
+    try {
+        const ProductType = require('../models/productType').default || require('../models/productType');
+        const productTypes = await ProductType.find().sort({ name: 1 });
+        
+        res.status(200).json({ 
+            success: true, 
+            productTypes,
+            message: "Product types fetched successfully"
+        });
+    } catch (error) {
+        console.error("Error fetching product types:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error fetching product types", 
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     createProduct,
     getAllProducts,
     deleteProduct,
     getProductById,
-    getDiscountBannerProduct,  
+    getDiscountBannerProduct,
+    getFilterOptions,
+    getProductTypes
 }

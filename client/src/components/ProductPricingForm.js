@@ -30,8 +30,8 @@ const PricingForm = memo(({ product, dispatchProduct }) => (
                 type="number"
                 name="price"
                 id="price"
-                value={product?.price}
-                onChange={(e) => dispatchProduct({ type: "SET_PRICE", payload: e.target.value })}
+                value={product?.price || 0}
+                onChange={(e) => dispatchProduct({ type: "SET_PRICE", payload: Number(e.target.value) })}
                 className=" border border-gray-300 text-gray-900 text-sm rounded-lg 
                            focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 
                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
@@ -53,8 +53,8 @@ const PricingForm = memo(({ product, dispatchProduct }) => (
                 type="number"
                 name="compareAtPrice"
                 id="compareAtPrice"
-                value={product?.compareAtPrice}
-                onChange={(e) => dispatchProduct({ type: "SET_COMPARE_AT_PRICE", payload: e.target.value })}
+                value={product?.compareAtPrice || 0}
+                onChange={(e) => dispatchProduct({ type: "SET_COMPARE_AT_PRICE", payload: Number(e.target.value) })}
                 className=" border border-gray-300 text-gray-900 text-sm rounded-lg 
                            focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 
                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
@@ -90,8 +90,8 @@ const PricingForm = memo(({ product, dispatchProduct }) => (
                 type="number"
                 name="costPerItem"
                 id="costPerItem"
-                value={product?.costPerItem}
-                onChange={(e) => dispatchProduct({ type: "SET_COST_PER_ITEM", payload: e.target.value })}
+                value={product?.costPerItem || 0}
+                onChange={(e) => dispatchProduct({ type: "SET_COST_PER_ITEM", payload: Number(e.target.value) })}
                 className=" border border-gray-300 text-gray-900 text-sm rounded-lg 
                            focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 
                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 

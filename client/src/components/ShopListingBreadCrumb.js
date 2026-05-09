@@ -18,14 +18,20 @@ import { use } from "react"
 
 
 
-export default function ShopListingBreadCrumb({ items }) {
+export default function ShopListingBreadCrumb({ items, breadCrumb }) {
+  // Support both prop names for flexibility
+  const breadcrumbItems = items || breadCrumb || []
 
- // Assuming you have a categories slice in your Redux store    
+  // Handle empty breadcrumb
+  if (!breadcrumbItems || breadcrumbItems.length === 0) {
+    return null
+  }
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {items.map((item, index) => {
-          const isLast = index == items.length - 1 
+        {breadcrumbItems.map((item, index) => {
+          const isLast = index === breadcrumbItems.length - 1 
 
           const href = item.href || `/products?category=${item._id}`
 
