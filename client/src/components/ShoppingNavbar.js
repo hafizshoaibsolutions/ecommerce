@@ -22,7 +22,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 const MobileCategoryItem = ({ category, onClick }) => (
   <Link 
     key={category._id}
-    href={`/shopping/products?category=${category.slug}`}
+    href={`/products?category=${category.slug}`}
     className="flex items-center gap-2 p-2 pl-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors" 
     onClick={onClick}
   >

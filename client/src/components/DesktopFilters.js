@@ -1,8 +1,12 @@
 import React from 'react'
+import SubCategoryList from './SubCategoryList'
 
 function DesktopFilters() {
   return (
-    <div>DesktopFilters</div>
+    <aside className=''>
+      <SubCategoryList />
+
+    </aside>
   )
 }
 

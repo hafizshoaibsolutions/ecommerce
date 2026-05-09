@@ -1,4 +1,5 @@
 'use client'
+import React from "react"
 import Link from "next/link"
 import {
   Breadcrumb,
@@ -36,22 +37,22 @@ export default function ShopListingBreadCrumb({ items, breadCrumb }) {
           const href = item.href || `/products?category=${item._id}`
 
          return (
-          <BreadcrumbItem key={item._id}>
-            
-           {!isLast?(
-            <BreadcrumbLink asChild>
-              <Link href={href}>{item.name}</Link>     
-            </BreadcrumbLink>
-           ):(
-             <span className="text-muted-foreground">
-               {item.name}
-             </span>
-           )} 
-           {
-            !isLast && <BreadcrumbSeparator/> 
-           }
-            
-          </BreadcrumbItem>
+          <React.Fragment key={item._id}>
+            <BreadcrumbItem>
+              
+             {!isLast?(
+              <BreadcrumbLink asChild>
+                <Link href={href}>{item.name}</Link>     
+              </BreadcrumbLink>
+             ):(
+               <span className="text-muted-foreground">
+                 {item.name}
+               </span>
+             )} 
+              
+            </BreadcrumbItem>
+            {!isLast && <BreadcrumbSeparator/> }
+          </React.Fragment>
          )
 
 
