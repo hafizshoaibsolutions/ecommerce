@@ -20,6 +20,8 @@ import { use } from "react"
 
 
 export default function ShopListingBreadCrumb({ items, breadCrumb }) {
+
+  console.log(items, breadCrumb, "items and breadCrumb in ShopListingBreadCrumb")
   // Support both prop names for flexibility
   const breadcrumbItems = items || breadCrumb || []
 
@@ -34,7 +36,7 @@ export default function ShopListingBreadCrumb({ items, breadCrumb }) {
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1 
 
-          const href = item.href || `/products?category=${item._id}`
+          const href = item.href || `/products?category=${item.slug}`
 
          return (
           <React.Fragment key={item._id}>

@@ -14,29 +14,29 @@ const dispatch = useDispatch()
 const  categories  = useSelector((state) => state.categories.allCategories)
 console.log('Categories in ShopListingPage:', categories)
 const searchParams = useSearchParams()
-const categoryId = searchParams.get('category')
+const categorySlug = searchParams.get('category')
 
-console.log(categoryId,"category id")
+console.log(categorySlug,"category slug")
 
 
 useEffect(() => {
         // You can dispatch an action here to fetch products based on categoryId
         // For example: dispatch(fetchProductsByCategory(categoryId))
         // This is just a placeholder to show where you would put your fetching logic
-        console.log('Category ID from URL:', categoryId)
+        console.log('Category Slug from URL:', categorySlug)
 
         dispatch(fetchCategories()) // Fetch categories to ensure breadcrumb has data
         
-}, [dispatch, categoryId])
+}, [dispatch, categorySlug])
 
 const breadcrumbItems = React.useMemo(() => {
         if (!categories || categories.length === 0) {
           return [{ _id: 'home', name: 'Home', href: '/' }]
         }
 
-    return getBreadCrumb(categoryId, categories) 
+    return getBreadCrumb(categorySlug, categories) 
 
-}, [categoryId, categories])
+}, [categorySlug, categories])
 
 console.log(breadcrumbItems,"breadcrumb items in ShopListingPage")
 

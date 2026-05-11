@@ -115,7 +115,7 @@ export default function ShoppingNavbar() {
                     categories.map((category) => (
                       <li key={category._id}>
                         <NavigationMenuLink asChild>
-                          <Link href={`/products?category=${category._id}`} className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <Link href={`/products?category=${category.slug}`} className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                             <div className="flex items-start gap-3">
                               {category.images && category.images[0] && (
                                 <Image 

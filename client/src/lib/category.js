@@ -1,38 +1,52 @@
 
 
 
-export const getBreadCrumb = (categoryId, categories) => {
+export const getBreadCrumb = (slug, categories) => {
 
-  console.log(categories.length, categoryId, "categories count and categoryId in getBreadCrumb");
+  console.log(categories.length, slug, "categories count and slug in getBreadCrumb");
   // Validate categories is an array
+
+  const defaultBreadcrumb = [{ _id: "home", name: "Home", href: "/" }];
+
+
   if (!Array.isArray(categories) || categories.length === 0) {
-    return [{ _id: "home", name: "Home", href: "/" }];
+    return defaultBreadcrumb;
   }
 
-  // Early exit if no categoryId
-  if (!categoryId) {
-    return [{ _id: "home", name: "Home", href: "/" }];
+  // Early exit if no slug
+  if (!slug) {
+    return defaultBreadcrumb;
   }
 
   // Build map only once efficiently
-  const map = new Map(categories.map(category => [category._id, category]));
+  const idMap = new Map(categories.map(category => [category._id, category]));
 
-  console.log(categories.length, categoryId, "categories count and categoryId in getBreadCrumb");
+  const slugMap = new Map(categories.map(category => [category.slug, category]));
 
-  let current = map.get(categoryId);
+  let current = slugMap.get(slug);
+
+  console.log(categories.length, slug, "categories count and slug in getBreadCrumb");
+
   const breadcrumb = [];
 
   // Build breadcrumb from child to parent, then reverse
   while (current){
-    breadcrumb.push(current);
-    current = map.get(current.parent);
+    breadcrumb.push({
+      _id: current._id,
+      name: current.name,
+      slug: current.slug,
+      href: `/shop?category=${current.slug}`
+    });
+    current = idMap.get(current.parent);
   }
 
   // Reverse to get parent to child order, more efficient than unshift
   breadcrumb.reverse();
 
+  console.log(breadcrumb, "breadcrumb in getBreadCrumb");
+
   return [
-    { _id: "home", name: "Home", href: "/" },
+    ...defaultBreadcrumb,
     ...breadcrumb
   ];
 
