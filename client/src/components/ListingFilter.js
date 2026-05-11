@@ -3,7 +3,7 @@ import MobileFilterSheet from './MobileFilterSheet'
 import FilterListingHeader from './FilterListingHeader'
 import DesktopFilters from './DesktopFilters'
 
-function ListingFilter() {
+function ListingFilter({currentCategory, children}) {
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
   return (
@@ -12,7 +12,7 @@ function ListingFilter() {
        <main className='max-w-7xl mx-auto px-4 lg:px-8 '>
         <FilterListingHeader setOpen={setMobileFilterOpen} />
           <div className='grid lg:grid-cols-4  gap-8'>
-            <DesktopFilters />
+            <DesktopFilters currentCategory={currentCategory} children={children} />
           </div>
        </main>
     </div>

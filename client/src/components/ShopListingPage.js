@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useDispatch,useSelector } from 'react-redux'
 import ShopListingBreadCrumb from './ShopListingBreadCrumb'
 import ListingFilter from './ListingFilter'
 import { fetchCategories } from '@/store/slices/categorySlice'
 import { getBreadCrumb } from '@/lib/category'
+
+import { useCategoryTree } from '@/hooks/useCategoryTree'
  
 
 function ShopListingPage() {
@@ -16,7 +19,14 @@ console.log('Categories in ShopListingPage:', categories)
 const searchParams = useSearchParams()
 const categorySlug = searchParams.get('category')
 
+
+ const { currentCategory, children } = useCategoryTree(categories, categorySlug)
+
+console.log(categorySlug,"category slug from search params")
+
 console.log(categorySlug,"category slug")
+
+
 
 
 useEffect(() => {
@@ -26,6 +36,8 @@ useEffect(() => {
         console.log('Category Slug from URL:', categorySlug)
 
         dispatch(fetchCategories()) // Fetch categories to ensure breadcrumb has data
+
+        const {} = useCategoryTree(categories, categorySlug)
         
 }, [dispatch, categorySlug])
 
@@ -46,7 +58,7 @@ console.log(breadcrumbItems,"breadcrumb items in ShopListingPage")
           <ShopListingBreadCrumb items={breadcrumbItems} />
       </div>
       
-        <ListingFilter />    
+        <ListingFilter currentCategory={currentCategory} children={children} />    
     </div>
   )
 }

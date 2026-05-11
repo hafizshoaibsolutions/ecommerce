@@ -1,10 +1,10 @@
 import React from 'react'
 import SubCategoryList from './SubCategoryList'
 
-function DesktopFilters() {
+function DesktopFilters({currentCategory, children}) {
   return (
     <aside className=''>
-      <SubCategoryList />
+      <SubCategoryList currentCategory={currentCategory} children={children} />
 
     </aside>
   )
