@@ -35,7 +35,7 @@ export const getBreadCrumb = (slug, categories) => {
       _id: current._id,
       name: current.name,
       slug: current.slug,
-      href: `/shop?category=${current.slug}`
+      href: `/products?category=${current.slug}`
     });
     current = idMap.get(current.parent);
   }

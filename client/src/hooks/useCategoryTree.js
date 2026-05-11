@@ -9,8 +9,12 @@ export const useCategoryTree = (categories,currentSlug) => {
     const children = categories.filter(cat => cat.parent === currentCategory?._id)
     console.log(children,"children in useCategoryTree")
 
+    const siblings = categories.filter(cat => cat.parent === currentCategory?.parent)
+    console.log(siblings,"siblings in useCategoryTree")
+
     return {
         currentCategory,
-        children
+        children,
+        siblings
     }
 }

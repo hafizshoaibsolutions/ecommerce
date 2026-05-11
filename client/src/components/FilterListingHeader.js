@@ -4,7 +4,7 @@ import SortMenu from './SortMenu'
 
 function FilterListingHeader({setOpen}) {
   return (
-    <div className='flex items-center justify-between py-4 border-b '>
+    <div className='flex items-center justify-between py-4 border-b  '>
         <h1 className='text-3xl font-bold'>Products</h1>
         <div className='flex  items-center'>
             <SortMenu />

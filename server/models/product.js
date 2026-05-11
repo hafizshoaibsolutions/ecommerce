@@ -20,6 +20,7 @@ const productSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true, minlength: 3 },
     slug: { type: String, unique: true, index: true },
     description: String,
+    brand: String,
     images: [String], // main product images
     price: { type: Number, required: true, min: 0 },
     compareAtPrice: Number,

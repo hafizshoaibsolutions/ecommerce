@@ -20,7 +20,7 @@ const searchParams = useSearchParams()
 const categorySlug = searchParams.get('category')
 
 
- const { currentCategory, children } = useCategoryTree(categories, categorySlug)
+ const { currentCategory, children,siblings } = useCategoryTree(categories, categorySlug)
 
 console.log(categorySlug,"category slug from search params")
 
@@ -58,7 +58,7 @@ console.log(breadcrumbItems,"breadcrumb items in ShopListingPage")
           <ShopListingBreadCrumb items={breadcrumbItems} />
       </div>
       
-        <ListingFilter currentCategory={currentCategory} children={children} />    
+        <ListingFilter currentCategory={currentCategory} children={children} siblings={siblings} />    
     </div>
   )
 }
