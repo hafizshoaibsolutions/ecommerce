@@ -19,6 +19,7 @@ export default function ProductCategories() {
 
   const imageUploaderRef = useRef(null)
   const [uploadedImages, setUploadedImages] = useState([])
+  const [error, setError] = useState(null)
   const dispatch = useDispatch();
 
 
@@ -57,6 +58,7 @@ export default function ProductCategories() {
   // Example: handle submit form (including images)
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError(null)
 
 
     const form = new FormData()
@@ -64,8 +66,14 @@ export default function ProductCategories() {
     
     form.append("parent", formData.parent)
 
+    console.log("Form data before submission:", {
+      name: formData.name,
+      parent: formData.parent,
+      images: uploadedImages.map(fileObj => fileObj.file.name) // Just log file names for clarity
+    })
+
     if (uploadedImages.length === 0) {
-      alert("Please upload at least one image.")
+      setError("Please upload at least one image.")
       return
     }
 
@@ -76,16 +84,31 @@ export default function ProductCategories() {
     })
 
     try {
+
+      console.log("Submitting category with data:", {
+        name: formData.name,
+        parent: formData.parent,
+        images: uploadedImages.map(fileObj => fileObj.file.name) // Just log file names for clarity
+      })
+
+      for (let pair of form.entries()) {
+  console.log(pair[0], pair[1], pair[1] instanceof File ? `(File: ${pair[1].name})` : '');
+}
       // Wait for the category to be added and lists to refresh
       await dispatch(addCategory(form)).unwrap();
+
+      console.log("Category added successfully, refreshing lists...");
+      console.log(form,"form data being sent to backend");
       
       // Only reset form if the submission was successful
       setFormData({ name: "", description: "", parent: "" });
       setUploadedImages([]);
       imageUploaderRef.current?.clearFiles();
+      setError(null)
     } catch (error) {
       console.error("Failed to add category:", error);
-      // Here you could show an error toast/alert to the user
+      // Display the error message to the user
+      setError(error?.message || "Failed to add category. Please try again.");
     }
 
 
@@ -100,6 +123,11 @@ export default function ProductCategories() {
         {/* Add Category Form */}
         <div className="bg-white rounded-xl shadow-sm p-5">
           <h2 className="text-lg font-semibold mb-4">Add New Category</h2>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm text-gray-600">Name</label>

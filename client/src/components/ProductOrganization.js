@@ -56,6 +56,25 @@ function ProductOrganization({ product, dispatchProduct }) {
           <form>
             <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
 
+              <div className="sm:col-span-2">
+                <label className="block mb-2 text-sm font-medium text-gray-900">
+                  Brand
+                </label>
+                <input
+                  type="text"
+                  placeholder="Type brand name"
+                  value={product?.brand || ""}
+                  onChange={(e) =>
+                    dispatchProduct({
+                      type: "SET_BRAND",
+                      payload: e.target.value,
+                    })
+                  }
+                  className="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                />
+
+              </div>
+
               {/* Vendor */}
               <div className="sm:col-span-2">
                 <label className="block mb-2 text-sm font-medium text-gray-900">

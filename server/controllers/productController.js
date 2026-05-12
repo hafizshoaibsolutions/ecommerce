@@ -20,7 +20,7 @@ const createProduct = async (req, res) => {
 
   console.log("Request body:", req?.body);
   console.log("Uploaded files (req.files):", req?.files);
- 
+  console.log("Raw variants from req.body:", req?.body?.variants);
 
 
   try {
@@ -54,6 +54,7 @@ const createProduct = async (req, res) => {
       title,
       description,
       price,
+      brand,
       compareAtPrice,
       costPerItem,
       chargeTax,
@@ -72,12 +73,22 @@ const createProduct = async (req, res) => {
     } = req.body;
 
     // Parse arrays/objects that were sent as JSON strings
-    const collections = parseJSON(req.body.collections);
-    const promotions = parseJSON(req.body.promotions);
-    const tags = parseJSON(req.body.tags);
-    const categories = parseJSON(req.body.categories);
-    const variants = parseJSON(req.body.variants);
-
+    let collections, promotions, tags, categories, variants;
+    
+    try {
+      collections = parseJSON(req.body.collections);
+      promotions = parseJSON(req.body.promotions);
+      tags = parseJSON(req.body.tags);
+      categories = parseJSON(req.body.categories);
+      variants = parseJSON(req.body.variants);
+    } catch (parseErr) {
+      console.error("❌ Error parsing JSON fields:", parseErr);
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid JSON in collections, promotions, tags, categories, or variants",
+        error: parseErr.message 
+      });
+    }
 
     console.log({
       title,
@@ -86,6 +97,7 @@ const createProduct = async (req, res) => {
       compareAtPrice,
       costPerItem,
       chargeTax,
+      brand,
       sku,
       barcode,
       trackQuantity,
@@ -106,15 +118,18 @@ const createProduct = async (req, res) => {
       imgUrls
     }, "Parsed product data in controller")
 
-    // // 🛠 Basic validation
-    // if (!title || !price) {
-    //   return res.status(400).json({ message: "Title and price are required." });
-    // }
+    // 🛠 Basic validation
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: "Title is required." });
+    }
+    if (!price || price <= 0) {
+      return res.status(400).json({ success: false, message: "Valid price is required." });
+    }
 
     // 🆕 Create product document
     const product = new Product({
-      title,
-      slug: slugify(title, { lower: true }),
+      title: title.trim(),
+      slug: slugify(title.trim(), { lower: true }),
       description,
       images: imgUrls,
       price,
@@ -128,6 +143,7 @@ const createProduct = async (req, res) => {
       continueSellingWhenOutOfStock,
       isPhysicalProduct,
       vendor,
+      brand,
       collections,
       promotions,
       tags,
@@ -144,10 +160,29 @@ const createProduct = async (req, res) => {
 
     res.status(201).json({ success: true, message: "Product created successfully", product });
   } catch (err) {
-    console.error("❌ Error creating product:", err);
-    res.status(500).json({ success: false, message: "Server error", error: err.message });
+    console.error("❌ Error creating product:", err.message);
+    console.error("❌ Full error:", err);
+    
+    // Check if it's a validation error
+    if (err.name === 'ValidationError') {
+      const validationErrors = Object.keys(err.errors).map(key => 
+        `${key}: ${err.errors[key].message}`
+      );
+      return res.status(400).json({ 
+        success: false, 
+        message: "Validation error", 
+        errors: validationErrors 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error", 
+      error: err.message,
+      details: err.errors || null
+    });
   }
-};
+  }
 
 
 

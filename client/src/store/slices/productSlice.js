@@ -10,7 +10,11 @@ const api = axios.create({
 export const addProducts = createAsyncThunk(
     "product/addProducts",
     async (productFormData,{ rejectWithValue }) => {
+
+        
          console.log(productFormData,"product data in thunk");
+
+
 
          
         try {

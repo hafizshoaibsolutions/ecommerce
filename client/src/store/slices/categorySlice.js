@@ -45,6 +45,18 @@ export const fetchCategoriesTree = createAsyncThunk(
 export const addCategory = createAsyncThunk(
   "categories/addCategory",
   async (categoryData, { rejectWithValue, dispatch }) => {
+
+    console.log("Adding category with data:", categoryData);
+
+
+    console.log("Category data being sent to backend:", {
+      name: categoryData.get("name"),
+      parent: categoryData.get("parent"),
+      images: categoryData.getAll("images").map(file => file.name) // Log file names for clarity
+    });
+
+
+
     try {
       const res = await api.post("/add-category", categoryData, {
         headers: { 'Content-Type': 'multipart/form-data' }

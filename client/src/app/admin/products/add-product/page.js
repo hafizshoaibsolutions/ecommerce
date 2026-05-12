@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useReducer, useRef, useCallback } from "react";
+import React, { useState, useReducer, useRef, useCallback, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 
@@ -16,6 +16,7 @@ import ProductOrganization from "@/components/ProductOrganization";
 const initialProduct = {
   title: "",
   description: "",
+  brand: "",
   images: [], // array of URLs
   price: 0,
   compareAtPrice: 0,
@@ -49,6 +50,9 @@ const productReducer = (state, action) => {
     
     case "SET_IMAGES":
       return { ...state, images: action.payload };
+    
+    case "SET_BRAND":
+      return { ...state, brand: action.payload };
     
     case "SET_PRICE":
       return { ...state, price: action.payload };
@@ -119,7 +123,10 @@ function AddProductPage() {
   const [variants, setVariants] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  
+  // Sync variants to product reducer whenever they change
+  useEffect(() => {
+    dispatchProduct({ type: "SET_VARIANTS", payload: variants });
+  }, [variants, dispatchProduct]);
  
 
 
@@ -147,6 +154,7 @@ function AddProductPage() {
         "price",
         "compareAtPrice",
         "costPerItem",
+        "brand",
         "sku",
         "quantity",
         "barcode",
