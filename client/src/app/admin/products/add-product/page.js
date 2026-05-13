@@ -192,8 +192,7 @@ function AddProductPage() {
         const variantOptions = Object.keys(v)
           .filter((key) => !["price", "sku", "barcode", "quantity"].includes(key))
           .map((key) => ({
-            name: key,
-            value: v[key]
+            [key]: v[key]
           }))
         
         return { 
