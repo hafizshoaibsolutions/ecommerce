@@ -190,6 +190,8 @@ const createProduct = async (req, res) => {
 
 
 const getAllProducts = async (req, res) => {
+  console.log("Query parameters:", req.query);
+  console.log("Headers:", req.headers);
   try {
     const { search, category, minPrice, maxPrice, brands, page = 1, limit = 10, sort = '-createdAt' } = req.query;
     let query = { status: "active" };
@@ -225,6 +227,8 @@ const getAllProducts = async (req, res) => {
       .sort(sortObj || { createdAt: -1 });
 
     const total = await Product.countDocuments(query);
+
+    console.log(products,"products in getAllProducts controller")
 
     res.status(200).json({ success: true, products, totalPages: Math.ceil(total / limit), currentPage: page });
   } catch (err) {
