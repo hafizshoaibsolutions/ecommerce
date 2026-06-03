@@ -90,6 +90,8 @@ const createProduct = async (req, res) => {
       });
     }
 
+    console.log("Parsed collections:", variants?.options);
+
     console.log({
       title,
       description,
